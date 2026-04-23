@@ -44,3 +44,33 @@ export const deleteJob = async (req, res)=>{
     res.status(500).json({message: err.message});
   }
 };
+
+
+export const updateJob= async (req, res) =>{
+  try{
+    const job= await Job.findById(req.params.id);
+
+    if(!job){
+      return res.status(404).json({message: "Job not found"});
+    }
+
+    if (req.user.role !== "admin"){
+      return res.status(403).json({message:"Access denied"});
+    }
+
+    const {title, company, location, salary, description} = req.body;
+
+    job.title = title || job.title;
+    job.company = company || job.company;
+    job.location = location || job.location;
+    job.salary = salary || job.salary;
+    job.description = description || job.description;
+
+    await job.save();
+
+    res.json({message: "Job updated successfully", job});
+
+  }catch(err){
+    res.status(500).json({message: err.message});
+  }
+}
